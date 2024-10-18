@@ -32,7 +32,8 @@
                 const context = canvas.getContext('2d');
 
                 // WebSocket 연결
-                ws = new WebSocket("ws://127.0.0.1:8000/ws");
+                // ws = new WebSocket("ws://127.0.0.1:8000/ws");
+                ws = new WebSocket("ws://43.201.158.217:8000/ws");
 
                 // WebSocket 열리면 전송 시작
                 ws.onopen = () => {
