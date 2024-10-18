@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Streaming Client with WebSocket</title>
+    <style>
+        video {
+            width: 640px;
+            height: 480px;
+            border: 2px solid black;
+        }
+    </style>
+</head>
+<body>
+    <h1>실시간 카메라 테스트</h1>
+    <video id="video" autoplay></video>
+    <button id="startBtn">Start Streaming</button>
+
+    <script>
+        const videoElement = document.getElementById('video');
+        const startBtn = document.getElementById('startBtn');
+        let ws;
+
+        // 비디오 스트리밍 시작 함수
+        async function startStreaming() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                videoElement.srcObject = stream;
+
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+
+                // WebSocket 연결
+                ws = new WebSocket("ws://127.0.0.1:8000/ws");
+
+                // WebSocket 열리면 전송 시작
+                ws.onopen = () => {
+                    console.log("WebSocket connected");
+
+                    setInterval(() => {
+                        canvas.width = videoElement.videoWidth;
+                        canvas.height = videoElement.videoHeight;
+                        context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+
+                        // 캡처된 프레임을 Blob으로 변환 후 WebSocket으로 전송
+                        canvas.toBlob((blob) => {
+                            if (blob && ws.readyState === WebSocket.OPEN) {
+                                ws.send(blob);
+                            }
+                        }, 'image/jpeg');
+                    }, 1000);  // 1초마다 프레임 전송
+                };
+
+                // 서버로부터 분석 결과 수신
+                ws.onmessage = (event) => {
+                    const data = JSON.parse(event.data);
+                    console.log("Server response:", data);
+                };
+
+                // WebSocket 에러 처리
+                ws.onerror = (error) => {
+                    console.error("WebSocket error:", error);
+                };
+
+                // WebSocket 연결 종료 시 처리
+                ws.onclose = () => {
+                    console.log("WebSocket closed");
+                };
+            } catch (err) {
+                console.error("Error accessing camera:", err);
+            }
+        }
+
+        // 버튼 클릭 시 스트리밍 시작
+        startBtn.addEventListener('click', () => {
+            startStreaming();
+        });
+    </script>
+</body>
+</html>
