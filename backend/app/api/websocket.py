@@ -1,9 +1,9 @@
 from fastapi import APIRouter, WebSocket
 from app.services.gender_detection import process_frame
 
-websocket_endpoint = APIRouter()
+router = APIRouter()
 
-@websocket_endpoint.websocket("/ws")
+@router.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
 

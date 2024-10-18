@@ -51,4 +51,7 @@ def process_frame(data):
                     "confidence": confidence,
                     "bbox": [x1, y1, x2, y2]
                 })
+
+                # 여기서 콘솔에 성별 예측 결과를 출력
+                print(f"감지됨: {gender_label}, 신뢰도: {confidence:.2f}")
     return result_list

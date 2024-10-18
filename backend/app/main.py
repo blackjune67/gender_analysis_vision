@@ -1,10 +1,10 @@
 from fastapi import FastAPI, WebSocket
-from app.api.websocket import websocket_endpoint
+from app.api.websocket import router
 app = FastAPI()
 
 # API 컨트롤러
 
-app.include_router(websocket_endpoint)
+app.include_router(router)
 
 if __name__ == "__main__":
     import uvicorn
