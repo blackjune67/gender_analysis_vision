@@ -33,7 +33,7 @@ matplotlib==3.9.2
 mdurl==0.1.2
 ml-dtypes==0.3.2
 mpmath==1.3.0
-mtcnn==1.0.0
+git+https://github.com/ipazc/mtcnn.git
 namex==0.0.8
 networkx==3.4.1
 numpy==1.24.3
