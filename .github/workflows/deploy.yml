@@ -1,0 +1,42 @@
+name: Deploy Python App to EC2
+
+on:
+  push:
+    branches:
+      - main  # main 브랜치에 푸시될 때마다 실행
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2  # 최신 코드를 가져옴
+
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}  # GitHub Secrets에 저장된 SSH 키 사용
+
+      - name: Deploy to EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_HOST }} << EOF
+            # 프로젝트 디렉터리가 없는 경우 저장소를 클론한다.
+            if [ ! -d "/home/ec2-user/gender_analysis_vision" ]; then
+              git clone https://github.com/blackjune67/gender_analysis_vision.git /home/ec2-user/gender_analysis_vision
+            fi
+            cd /home/ec2-user/gender_analysis_vision/backend || exit 1
+            git pull origin main
+            sudo yum install python3 -y
+            sudo yum install python3-pip -y
+            # 의존성 설치
+            if [ -f "requirements.txt" ]; then
+              pip3 install -r requirements.txt || { echo "Failed to install dependencies"; exit 1; }
+            else
+              echo "requirements.txt not found"
+              exit 1
+            fi
+            pkill -f 'uvicorn' || true  # 기존에 실행 중인 uvicorn 프로세스 종료
+            # nohup uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload &
+            nohup uvicorn main:app --host 0.0.0.0 --port 8000 > my.log 2>&1 &
+          EOF
