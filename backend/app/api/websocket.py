@@ -1,4 +1,4 @@
-from fastapi import APIRouter, WebSocket
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from app.services.gender_detection import process_frame
 
 router = APIRouter()
@@ -15,6 +15,8 @@ async def websocket_endpoint(websocket: WebSocket):
             
             # 분석 결과를 클라이언트에 전송
             await websocket.send_json({"results": result_list})
+    except WebSocketDisconnect:
+        print("WebSocket disconnected")
 
     except Exception as e:
         print(f"Connection closed: {e}")
