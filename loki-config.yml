@@ -1,0 +1,48 @@
+auth_enabled: false
+
+server:
+  http_listen_port: 3100
+  grpc_listen_port: 9095
+
+ingester:
+  lifecycler:
+    ring:
+      kvstore:
+        store: inmemory
+      replication_factor: 1
+    final_sleep: 0s
+  chunk_idle_period: 5m
+  max_chunk_age: 1h
+  chunk_target_size: 1048576
+  chunk_retain_period: 30s
+
+schema_config:
+  configs:
+    - from: 2022-10-24
+      store: boltdb-shipper
+      object_store: filesystem  # 올바른 스토리지 타입 지정
+      schema: v11
+      index:
+        prefix: index_
+        period: 24h
+
+storage_config:
+  boltdb_shipper:
+    active_index_directory: /loki/index
+    cache_location: /loki/boltdb-cache
+  filesystem:
+    directory: /loki/chunks
+
+limits_config:
+  reject_old_samples: true
+  reject_old_samples_max_age: 168h
+  allow_structured_metadata: false  # 추가된 항목
+
+chunk_store_config: {}
+
+table_manager:
+  retention_deletes_enabled: false
+  retention_period: 0s
+
+common:
+  path_prefix: /loki  # 추가된 항목
