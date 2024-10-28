@@ -1,0 +1,18 @@
+# 백엔드와 무관한 디렉터리 및 파일 제외
+loki_data/
+logs/
+front/
+.github/
+.vscode/
+.gitignore
+.idea
+.git
+
+# 필요 없는 파일들
+*.log
+*.md
+*.yml
+
+# 빌드 후 필요 없는 캐시 파일들
+__pycache__/
+*.pyc

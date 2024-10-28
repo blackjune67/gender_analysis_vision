@@ -1,4 +1,12 @@
 services:
+  backend:
+      image: forring7/gender_analysis_vision_python_server:tagname
+      container_name: python_backend
+      ports:
+        - "8000:8000"  # 백엔드 서비스가 외부에서 접근 가능한 포트 설정
+      depends_on:
+        - loki  # 필요시 Loki에 의존성을 추가 (예: 로그 전송 시)
+
   loki:
     image: grafana/loki:latest
     container_name: loki
@@ -33,7 +41,3 @@ services:
 
 volumes:
   grafana-storage:
-
-networks:
-  default:
-    name: loki_monitoring_network
