@@ -21,7 +21,7 @@ jobs:
         run: docker build -t forring7/gender_analysis_vision_python_server:1.0.0 .
 
       - name: Push Docker image to Docker Hub
-        run: docker push forring7/gender_analysis_vision_python_server:tagname
+        run: docker push forring7/gender_analysis_vision_python_server:1.0.0 .
 
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.5.3
