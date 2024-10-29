@@ -2,15 +2,30 @@ from ultralytics import YOLO
 from mtcnn import MTCNN
 from transformers import AutoImageProcessor, AutoModelForImageClassification
 from PIL import Image
+from logging_loki import LokiHandler
 import cv2
 import numpy as np
 import torch
+import logging
 
 # 모델 초기화
 yolo_model = YOLO("yolo11n.pt")
 face_detector = MTCNN()
 processor = AutoImageProcessor.from_pretrained("rizvandwiki/gender-classification")
 gender_model = AutoModelForImageClassification.from_pretrained("rizvandwiki/gender-classification")
+
+# 로그 설정
+loki_handler = LokiHandler(
+    # url="http://localhost:3100/loki/api/v1/push",  # Loki URL
+    url="http://loki:3100/loki/api/v1/push",  # Loki URL
+    tags={"application": "gender_analysis_vision"},  # 태그 추가
+    version="1",  # Loki 로그 포맷 버전
+)
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+# logger.addHandler(console_handler)
+logger.addHandler(loki_handler)
 
 def process_frame(data):
     nparr = np.frombuffer(data, np.uint8)
@@ -53,5 +68,7 @@ def process_frame(data):
                 })
 
                 # 여기서 콘솔에 성별 예측 결과를 출력
-                print(f"감지됨: {gender_label}, 신뢰도: {confidence:.2f}")
+                # print(f"감지됨: {gender_label}, 신뢰도: {confidence:.2f}")
+                logging.info(f"감지됨: {gender_label}, 신뢰도: {confidence:.2f}")
+                                
     return result_list

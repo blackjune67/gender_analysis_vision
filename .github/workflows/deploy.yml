@@ -1,4 +1,4 @@
-name: Deploy Python App to EC2
+name: Deploy Dockerized Python App to EC2
 
 on:
   push:
@@ -13,6 +13,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2  # 최신 코드를 가져옴
 
+      - name: Log in to Docker Hub
+        run: echo "${{ secrets.DOCKER_HUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
+
+      - name: Build Docker image
+        # run: docker build -t your-docker-repo/gender_analysis_vision:latest .
+        run: docker build -t forring7/gender_analysis_vision_python_server:1.0.0 .
+
+      - name: Push Docker image to Docker Hub
+        run: docker push forring7/gender_analysis_vision_python_server:tagname
+
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.5.3
         with:
@@ -21,40 +31,13 @@ jobs:
       - name: Deploy to EC2
         run: |
           ssh -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_HOST }} << EOF
-            # 프로젝트 디렉터리가 없는 경우 저장소를 클론한다.
             if [ ! -d "/home/ec2-user/gender_analysis_vision" ]; then
               git clone https://github.com/blackjune67/gender_analysis_vision.git /home/ec2-user/gender_analysis_vision
             fi
-            cd /home/ec2-user/gender_analysis_vision/backend || exit 1
-            git pull origin main
-            sudo yum install python3 -y
-            sudo yum install python3-pip -y
+            cd /home/ec2-user/gender_analysis_vision
 
-
-            # 가상환경 
-            # virtualenv env
-
-            # 가상환경 활성화 하기
-            # source env/bin/activate
-
-            # 자동 활성화
-            # sudo yum update
-            # sudo yum install direnv
-
-            # if [ ! -d "venv" ]; then
-            #  python3 -m venv venv
-            # fi
-
-            # source venv/bin/activate
-
-            # 의존성 설치
-            if [ -f "requirements.txt" ]; then
-              pip3 install -r requirements.txt || { echo "Failed to install dependencies"; exit 1; }
-            else
-              echo "requirements.txt not found"
-              exit 1
-            fi
-            pkill -f 'uvicorn' || true  # 기존에 실행 중인 uvicorn 프로세스 종료
-            # nohup uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload &
-            nohup uvicorn main:app --host 0.0.0.0 --port 8000 > my.log 2>&1 &
+            # Docker Compose 파일을 사용해 컨테이너 실행
+            docker-compose down  # 기존 컨테이너 종료
+            docker-compose pull   # 최신 Docker 이미지 가져오기
+            docker-compose up -d  # Docker Compose로 애플리케이션 실행
           EOF
