@@ -1,9 +1,12 @@
 services:
   backend:
-      image: forring7/gender_analysis_vision_python_server:tagname
+      image: forring7/gender_analysis_vision_python_server:v1.0.0
       container_name: python_backend
       ports:
         - "8000:8000"  # 백엔드 서비스가 외부에서 접근 가능한 포트 설정
+      environment:
+        - ENVIRONMENT=production
+      command: uvicorn main:app --host 0.0.0.0 --port 8000  # Docker 컨테이너 시작 시 자동으로 실행
       depends_on:
         - loki  # 필요시 Loki에 의존성을 추가 (예: 로그 전송 시)
 
