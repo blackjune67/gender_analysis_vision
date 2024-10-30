@@ -38,6 +38,6 @@ jobs:
 
             # Docker Compose 파일을 사용해 컨테이너 실행
             docker-compose down  # 기존 컨테이너 종료
-            docker-compose pull   # 최신 Docker 이미지 가져오기
+            docker-compose pull --no-cache   # 최신 Docker 이미지 가져오기
             docker-compose up -d  # Docker Compose로 애플리케이션 실행
           EOF
