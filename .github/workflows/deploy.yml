@@ -31,12 +31,12 @@ jobs:
       - name: Deploy to EC2
         run: |
           ssh -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_HOST }} << EOF
-            if [ ! -d "/home/ec2-user/gender_analysis_vision" ]; then
-              git clone https://github.com/blackjune67/gender_analysis_vision.git /home/ec2-user/gender_analysis_vision
-            fi
-            cd /home/ec2-user/gender_analysis_vision
+            # if [ ! -d "/home/ec2-user/gender_analysis_vision" ]; then
+            # git clone https://github.com/blackjune67/gender_analysis_vision.git /home/ec2-user/gender_analysis_vision
+            # fi
+            # cd /home/ec2-user/gender_analysis_vision
 
-            git pull origin main
+            # git pull origin main
 
             # Docker Compose 파일을 사용해 컨테이너 실행
             docker-compose down  # 기존 컨테이너 종료
