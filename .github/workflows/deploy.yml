@@ -17,7 +17,6 @@ jobs:
         run: echo "${{ secrets.DOCKER_HUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
 
       - name: Build Docker image
-        if: needs.build.outputs.should_build == 'true'
         # run: docker build -t your-docker-repo/gender_analysis_vision:latest .
         run: docker build -t forring7/gender_analysis_vision_python_server:1.0.0 .
 
