@@ -6,7 +6,7 @@ WORKDIR /app
 
 # YOLO 모델 파일과 애플리케이션 코드를 복사 (자주변경 되는 부분을 상단에 배치)
 COPY yolo11n.pt . 
-COPY backend/app /app
+COPY . /app
 
 # 요구사항 파일을 컨테이너로 복사
 COPY backend/requirements.txt .
@@ -18,4 +18,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 EXPOSE 8000
 
 # 애플리케이션 실행
-CMD ["uvicorn", "backend.app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
