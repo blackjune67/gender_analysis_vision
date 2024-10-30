@@ -36,6 +36,8 @@ jobs:
             fi
             cd /home/ec2-user/gender_analysis_vision
 
+            git pull origin main
+
             # Docker Compose 파일을 사용해 컨테이너 실행
             docker-compose down  # 기존 컨테이너 종료
             docker-compose pull --no-cache   # 최신 Docker 이미지 가져오기
