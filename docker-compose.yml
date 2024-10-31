@@ -1,8 +1,5 @@
 services:
   backend:
-    build: 
-      context: .
-      dockerfile: ./backend/Docker
     image: forring7/gender_analysis_vision_python_server:1.0.0
     container_name: python_backend
     ports:
