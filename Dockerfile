@@ -15,7 +15,7 @@ ENV PYTHONPATH=/app
 
 # 패키지 설치
 # RUN pip install --no-cache-dir -r requirements.txt
-RUN pip install -r /requirements.txt
+RUN pip install -r /app/requirements.txt
 
 # 컨테이너 외부에서 접근할 수 있도록 포트 설정
 EXPOSE 8000
