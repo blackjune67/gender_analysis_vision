@@ -9,7 +9,7 @@ COPY yolo11n.pt .
 COPY . /app
 
 # 요구사항 파일을 컨테이너로 복사
-COPY app/requirements.txt .
+COPY requirements.txt .
 
 ENV PYTHONPATH=/app
 
