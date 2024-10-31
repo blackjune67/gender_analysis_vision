@@ -11,6 +11,8 @@ COPY . /backend /app/backend/
 # 요구사항 파일을 컨테이너로 복사
 COPY backend/requirements.txt .
 
+ENV PYTHONPATH=/app
+
 # 패키지 설치
 # RUN pip install --no-cache-dir -r requirements.txt
 RUN pip install -r /app/backend/requirements.txt
