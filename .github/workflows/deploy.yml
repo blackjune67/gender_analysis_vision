@@ -31,6 +31,15 @@ jobs:
       - name: Deploy to EC2
         run: |
           ssh -o StrictHostKeyChecking=no ec2-user@${{ secrets.EC2_HOST }} << EOF
+            # 디렉토리가 없으면 생성하고 git clone
+            if [ ! -d "/home/ec2-user/gender_analysis_vision" ]; then
+              cd /home/ec2-user
+              git clone https://github.com/blackjune67/gender_analysis_vision.git
+            else
+              cd /home/ec2-user/gender_analysis_vision
+              git pull origin main
+            fi
+            
             cd /home/ec2-user/gender_analysis_vision
       
             # 컨테이너와 이미지를 완전히 정리
