@@ -2,7 +2,6 @@ from fastapi import FastAPI, WebSocket
 from app.api.websocket import router
 
 app = FastAPI()
-
 # API 컨트롤러
 app.include_router(router)
 
