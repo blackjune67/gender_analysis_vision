@@ -39,8 +39,11 @@ jobs:
               cd /home/ec2-user/gender_analysis_vision
               git pull origin main
             fi
-            
+
             cd /home/ec2-user/gender_analysis_vision
+
+            echo "현재 디렉토리 구조"
+            ls -R
       
             # 컨테이너와 이미지를 완전히 정리
             docker-compose down
@@ -49,7 +52,11 @@ jobs:
             # 최신 이미지 가져오기 및 실행
             docker-compose pull
             docker-compose up -d
+
+            docker ps
             
             # 로그 확인
             docker-compose logs backend
+
+            docker exec python_backend ls -la /app
           EOF
