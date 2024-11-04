@@ -2,19 +2,6 @@
 FROM python:3.9-slim
 # FROM amazonlinux:2
 
-# RUN yum update -y && \
-#     yum install -y \
-#     python3 \
-#     python3-pip \
-#     mesa-libGL \
-#     glib2 \
-#     libXext \
-#     libXrender \
-#     libSM \
-#     python3-devel \
-#     gcc \
-#     && yum clean all && \
-#     rm -rf /var/cache/yum
 RUN apt-get update && apt-get install -y \
     libgl1-mesa-glx \
     libglib2.0-0 \
@@ -62,5 +49,5 @@ EXPOSE 8000
 # 애플리케이션 실행
 #CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
 # ENTRYPOINT ["uvicorn"]
-ENTRYPOINT ["python3", "-m", "uvicorn"]
+ENTRYPOINT ["python", "-m", "uvicorn"]
 CMD ["app.main:app", "--host", "0.0.0.0", "--port", "8000"]
