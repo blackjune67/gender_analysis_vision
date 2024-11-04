@@ -87,5 +87,6 @@ websockets==13.1
 Werkzeug==3.0.4
 wrapt==1.16.0
 # 모니터링
-# prometheus-client==0.16.0  # Prometheus와 메트릭 연동
-# prometheus-fastapi-instrumentator==5.9.1  # FastAPI 프로젝트용
+prometheus-client==0.16.0  # Prometheus와 메트릭 연동
+prometheus-fastapi-instrumentator==5.9.1  # FastAPI 프로젝트용
+python-logging-loki==0.3.1
