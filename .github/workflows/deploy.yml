@@ -58,5 +58,5 @@ jobs:
             # 로그 확인
             docker-compose logs backend
 
-            docker exec python_backend ls -la /app
+            docker exec python_backend ls -la /gender_analysis_vision
           EOF

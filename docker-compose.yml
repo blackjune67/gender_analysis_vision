@@ -6,9 +6,11 @@ services:
       - "8000:8000"  # 백엔드 서비스가 외부에서 접근 가능한 포트 설정
     environment:
       - ENVIRONMENT=production
-      - PYTHONPATH=/app
+      - PYTHONPATH=/gender_analysis_vision
     working_dir: /app
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000  # Docker 컨테이너 시작 시 자동으로 실행
+    volumes:
+      - .:/gender_analysis_vision
     depends_on:
       - loki  # 필요시 Loki에 의존성을 추가 (예: 로그 전송 시)
 

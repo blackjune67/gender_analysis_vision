@@ -2,7 +2,7 @@
 FROM python:3.9-slim
 
 # 작업 디렉터리 생성
-WORKDIR /app
+WORKDIR /gender_analysis_vision
 
 # 요구사항 파일을 컨테이너로 복사
 COPY requirements.txt .
@@ -12,20 +12,24 @@ RUN pip install --no-cache-dir -r requirements.txt
 # RUN pip install -r /app/requirements.txt
 
 # COPY yolo11n.pt . 
-COPY . /app/
+COPY . .
 
-RUN touch /app/app/__init__.py
-RUN touch /app/app/api/__init__.py
-RUN touch /app/app/services/__init__.py
+# RUN touch /app/app/__init__.py
+# RUN touch /app/app/api/__init__.py
+# RUN touch /app/app/services/__init__.py
+RUN mkdir -p /gender_analysis_vision/app/api /gender_analysis_vision/app/services \
+    && touch /gender_analysis_vision/app/__init__.py \
+    && touch /gender_analysis_vision/app/api/__init__.py \
+    && touch /gender_analysis_vision/app/services/__init__.py
 
 # YOLO 모델 파일과 애플리케이션 코드를 복사 (자주변경 되는 부분을 상단에 배치)
 # COPY yolo11n.pt . 
 # COPY . .
 
-ENV PYTHONPATH=/app
+ENV PYTHONPATH=/gender_analysis_vision
 
 # 실행 권한 설정
-RUN chmod -R 755 /app
+RUN chmod -R 755 /gender_analysis_vision
 
 # 컨테이너 외부에서 접근할 수 있도록 포트 설정
 EXPOSE 8000
