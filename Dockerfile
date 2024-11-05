@@ -26,17 +26,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 # COPY yolo11n.pt . 
 COPY . .
 
-# RUN touch /app/app/__init__.py
-# RUN touch /app/app/api/__init__.py
-# RUN touch /app/app/services/__init__.py
 RUN mkdir -p /gender_analysis_vision/app/api /gender_analysis_vision/app/services \
     && touch /gender_analysis_vision/app/__init__.py \
     && touch /gender_analysis_vision/app/api/__init__.py \
     && touch /gender_analysis_vision/app/services/__init__.py
-
-# YOLO 모델 파일과 애플리케이션 코드를 복사 (자주변경 되는 부분을 상단에 배치)
-# COPY yolo11n.pt . 
-# COPY . .
 
 ENV PYTHONPATH=/gender_analysis_vision
 
@@ -47,7 +40,4 @@ RUN chmod -R 755 /gender_analysis_vision
 EXPOSE 8000
 
 # 애플리케이션 실행
-#CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
-# ENTRYPOINT ["uvicorn"]
-ENTRYPOINT ["python", "-m", "uvicorn"]
-CMD ["app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

@@ -8,7 +8,7 @@ services:
       - ENVIRONMENT=production
       - PYTHONPATH=/gender_analysis_vision
     working_dir: /gender_analysis_vision
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000  # Docker 컨테이너 시작 시 자동으로 실행
+    # command: uvicorn app.main:app --host 0.0.0.0 --port 8000  # Docker 컨테이너 시작 시 자동으로 실행
     volumes:
       - .:/gender_analysis_vision
     depends_on:
