@@ -1,6 +1,7 @@
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, status
 from app.services.gender_detection import process_frame, FrameProcessor
 from typing import Dict
+from app.models.response_models import GenderDetectionResponse, GenderResult
 import asyncio
 import logging
 import traceback
@@ -38,6 +39,12 @@ manager = ConnectionManager()
 
 @router.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
+    """
+    ### 웹소켓 엔드포인트
+    - **설명**: 웹 소캣을 통해 클라이언트와 연결하고, 프레임을 처리하여 결과를 반환합니다.
+    - **경로**: `/ws`
+    - **클라이언트 연결**: `websocket.connect("/ws")`
+    """
     client_id = None
     try:
         client_id = await manager.connect(websocket)
@@ -55,8 +62,9 @@ async def websocket_endpoint(websocket: WebSocket):
                 frame_processor = manager.frame_processors.get(client_id)
                 result_list = process_frame(data, frame_processor)
                 
-                if result_list is not None:  # None이 아닐 때만 결과 전송
-                    await manager.send_message({"results": result_list}, websocket)
+                if result_list is not None:
+                    response = GenderDetectionResponse(results=result_list)
+                    await manager.send_message(response.model_dump(), websocket)
                 
             except asyncio.TimeoutError:
                 # 클라이언트 연결 상태 확인을 위한 ping 전송
@@ -85,3 +93,74 @@ async def websocket_endpoint(websocket: WebSocket):
     finally:
         if client_id and client_id in manager.active_connections:
             manager.disconnect(client_id)
+
+
+# @router.get("/gender-detection", response_model=GenderDetectionResponse)
+# async def get_gender_detection_results():
+#     """
+    
+#     """
+#     # 테스트 응답 데이터
+#     mock_result = [
+#         {
+#             "gender": "남성",
+#             "confidence": 0.95,
+#         }
+#     ]
+#     return {"results": mock_result}
+
+@router.get(
+        "/ws-docs", 
+        tags=["웹 소캣 API"],
+        response_model=GenderDetectionResponse,
+        response_description="WebSocket API 사용 설명서"
+)
+async def get_websocket_documentation():
+    """
+    # WebSocket API 사용 설명서
+    
+    ### WebSocket 엔드포인트
+    - `/ws`
+    
+    ### 연결 방법 예시
+    - ```markdown
+        const ws = new WebSocket('ws://43.201.158.217:8000/ws');
+        ```
+    
+    ### 요청 형식
+    - Binary 이미지 데이터 (JPEG/PNG)
+    - 웹에서는 캡처된 이미지를 Blob으로 변환하여 전송
+    
+    ### 응답 형식
+    - ```markdown
+        {
+            "results": [
+                {
+                "gender": "남성",
+                "confidence": 0.95
+                }
+            ]
+        }
+        ```
+
+    ### 주의사항
+    - 30초 타임아웃 설정
+    - 5프레임마다 처리
+    - 연결이 끊어질 경우 재연결 로직 필요
+    """
+    # return {
+    #     "results": [
+    #             {
+    #                 "gender": "남성",
+    #                 "confidence": 0.95
+    #             }
+    #         ]
+    # }
+    return GenderDetectionResponse(
+        results=[
+            GenderResult(
+                gender="남성",
+                confidence=0.95
+            )
+        ]
+    )
