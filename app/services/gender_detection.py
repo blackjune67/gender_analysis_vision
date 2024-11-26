@@ -55,6 +55,15 @@ class FrameProcessor:
         return False
 
 def process_frame(data, frame_processor):
+    """
+    ### 프레임 처리
+    - **기능**: 수신된 비디오 스트림 데이터를 분석해 성별 정보를 추출합니다.
+    - **입력 데이터**: 바이너리 형태의 비디오 프레임
+    - **출력 데이터**:
+        - 성별 (`gender`): "남성" 또는 "여성"
+        - 신뢰도 (`confidence`): 0.0 ~ 1.0 사이의 값
+        - 바운딩 박스 (`bbox`): [x1, y1, x2, y2] 형태의 좌표
+    """
     try:
         if not frame_processor.should_process_frame():
             return None
@@ -75,6 +84,8 @@ def process_frame(data, frame_processor):
         try:
             results = yolo_model(frame)
             detections = results[0].boxes
+            logging.debug(f"YOLO로 감지된 사람 수: {len(detections)}")
+            
         except Exception as e:
             logging.error(f"YOLO 처리 오류: {str(e)}")
             return None
@@ -94,6 +105,8 @@ def process_frame(data, frame_processor):
 
                     # MTCNN 얼굴 검출
                     faces = face_detector.detect_faces(person_image)
+                    logging.debug(f"MTCNN으로 감지된 얼굴 수: {len(faces)}")
+
                     for face in faces:
                         try:
                             x, y, width, height = face['box']
@@ -117,8 +130,7 @@ def process_frame(data, frame_processor):
 
                             result_list.append({
                                 "gender": gender_label,
-                                "confidence": confidence,
-                                "bbox": [x1, y1, x2, y2]
+                                "confidence": confidence
                             })
 
                             logging.info(f"[프레임 {frame_processor.frame_count}] 인식 결과: {gender_label}, 정확도: {confidence:.2f}")
@@ -131,6 +143,7 @@ def process_frame(data, frame_processor):
                 logging.error(f"사람 검출 처리 중 오류 발생: {str(e)}")
                 continue
 
+        logging.debug(f"최종 처리된 결과 수: {len(result_list)}")
         return result_list
 
     except Exception as e:
