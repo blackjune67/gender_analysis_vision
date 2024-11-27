@@ -1,20 +1,12 @@
-from ultralytics import YOLO
-from mtcnn import MTCNN
-from transformers import AutoImageProcessor, AutoModelForImageClassification
-from PIL import Image
+from .model_loader import ModelLoader
+from deepface import DeepFace
+# from PIL import Image
 from logging_loki import LokiHandler
 from time import time
 import cv2
 import numpy as np
-import torch
 import logging
 import traceback
-
-# 모델 초기화
-yolo_model = YOLO("yolo11n.pt")
-face_detector = MTCNN()
-processor = AutoImageProcessor.from_pretrained("rizvandwiki/gender-classification")
-gender_model = AutoModelForImageClassification.from_pretrained("rizvandwiki/gender-classification")
 
 # 로그 설정
 loki_handler = LokiHandler(
@@ -24,15 +16,15 @@ loki_handler = LokiHandler(
 )
 
 # 파일 핸들러 추가
-file_handler = logging.FileHandler('gender_detection.log')
-file_handler.setLevel(logging.DEBUG)
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-file_handler.setFormatter(formatter)
+# file_handler = logging.FileHandler('gender_detection.log')
+# file_handler.setLevel(logging.DEBUG)
+# formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+# file_handler.setFormatter(formatter)
 
-logger = logging.getLogger()
-logger.setLevel(logging.DEBUG)  # 로깅 레벨을 DEBUG로 변경
-logger.addHandler(loki_handler)
-logger.addHandler(file_handler)
+# logger = logging.getLogger()
+# logger.setLevel(logging.DEBUG)  # 로깅 레벨을 DEBUG로 변경
+# logger.addHandler(loki_handler)
+# logger.addHandler(file_handler)
 
 class FrameProcessor:
     def __init__(self, frame_interval=5):
@@ -61,8 +53,8 @@ def process_frame(data, frame_processor):
     - **입력 데이터**: 바이너리 형태의 비디오 프레임
     - **출력 데이터**:
         - 성별 (`gender`): "남성" 또는 "여성"
+        - 나이 (`age`): 추정된 나이
         - 신뢰도 (`confidence`): 0.0 ~ 1.0 사이의 값
-        - 바운딩 박스 (`bbox`): [x1, y1, x2, y2] 형태의 좌표
     """
     try:
         if not frame_processor.should_process_frame():
@@ -80,70 +72,43 @@ def process_frame(data, frame_processor):
             logging.error(f"이미지 디코딩 오류: {str(e)}")
             return None
 
-        # YOLO 처리
-        try:
-            results = yolo_model(frame)
-            detections = results[0].boxes
-            logging.debug(f"YOLO로 감지된 사람 수: {len(detections)}")
-            
-        except Exception as e:
-            logging.error(f"YOLO 처리 오류: {str(e)}")
-            return None
-
         result_list = []
         
-        for box in detections:
-            try:
-                if int(box.cls[0].item()) == 0:  # person
-                    x1, y1, x2, y2 = map(int, box.xyxy[0])
-                    if any(coord < 0 for coord in [x1, y1, x2, y2]):
-                        continue
-                    
-                    person_image = frame[y1:y2, x1:x2]
-                    if person_image.size == 0:
-                        continue
+        try:
+            analysis = DeepFace.analyze(
+                frame,
+                actions=['age','gender'],
+                enforce_detection=False,
+                detector_backend='opencv' # mtcnn, retinaface, yolo 등을 사용할 수 있음.
+            )
 
-                    # MTCNN 얼굴 검출
-                    faces = face_detector.detect_faces(person_image)
-                    logging.debug(f"MTCNN으로 감지된 얼굴 수: {len(faces)}")
+             # 리스트가 아닌 경우 리스트로 변환
+            if not isinstance(analysis, list):
+                analysis = [analysis]
 
-                    for face in faces:
-                        try:
-                            x, y, width, height = face['box']
-                            x, y = abs(x), abs(y)
-                            if x + width > person_image.shape[1] or y + height > person_image.shape[0]:
-                                continue
-                                
-                            face_image = person_image[y:y+height, x:x+width]
-                            if face_image.size == 0:
-                                continue
+            for face_data in analysis:
+                try:
+                    gender = "남성" if face_data["gender"]["Man"] > face_data["gender"]["Woman"] else "여성"
+                    gender_confidence = max(face_data["gender"]["Man"], face_data["gender"]["Woman"]) / 100.0
+                    age = face_data["age"]
 
-                            # 성별 분류
-                            face_image_pil = Image.fromarray(cv2.cvtColor(face_image, cv2.COLOR_BGR2RGB))
-                            inputs = processor(images=face_image_pil, return_tensors="pt")
-                            outputs = gender_model(**inputs)
-                            logits = outputs.logits
-                            predicted_class_idx = logits.argmax(-1).item()
+                    result_list.append({
+                        "gender": gender,
+                        "age": age,
+                        "confidence": gender_confidence
+                    })
 
-                            gender_label = '남성' if predicted_class_idx == 1 else '여성'
-                            confidence = torch.softmax(logits, dim=-1).max().item()
+                    logging.info(f"[프레임 {frame_processor.frame_count}] "
+                               f"인식 결과: {gender}, 나이: {age}, 정확도: {gender_confidence:.2f}")
+                
+                except Exception as e:
+                    logging.error(f"얼굴 데이터 처리 중 오류: {str(e)}")
+                    continue
 
-                            result_list.append({
-                                "gender": gender_label,
-                                "confidence": confidence
-                            })
+        except Exception as e:
+            logging.error(f"DeepFace 분석 중 오류: {str(e)}")
+            return None
 
-                            logging.info(f"[프레임 {frame_processor.frame_count}] 인식 결과: {gender_label}, 정확도: {confidence:.2f}")
-                        
-                        except Exception as e:
-                            logging.error(f"얼굴 처리 중 오류 발생: {str(e)}")
-                            continue
-
-            except Exception as e:
-                logging.error(f"사람 검출 처리 중 오류 발생: {str(e)}")
-                continue
-
-        logging.debug(f"최종 처리된 결과 수: {len(result_list)}")
         return result_list
 
     except Exception as e:
