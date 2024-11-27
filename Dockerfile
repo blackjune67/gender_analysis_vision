@@ -15,6 +15,9 @@ RUN apt-get update && apt-get install -y \
 # 작업 디렉터리 생성
 WORKDIR /gender_analysis_vision
 
+# pip 최신 버전 업그레이드
+RUN pip install --upgrade pip
+
 # 요구사항 파일을 컨테이너로 복사
 COPY requirements.txt .
 
