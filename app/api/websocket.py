@@ -160,6 +160,7 @@ async def get_websocket_documentation():
         results=[
             GenderResult(
                 gender="남성",
+                age=30,
                 confidence=0.95
             )
         ]
