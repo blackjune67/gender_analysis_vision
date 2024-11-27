@@ -1,6 +1,4 @@
-from .model_loader import ModelLoader
 from deepface import DeepFace
-# from PIL import Image
 from logging_loki import LokiHandler
 from time import time
 import cv2
