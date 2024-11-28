@@ -1,10 +1,13 @@
 from deepface import DeepFace
 from logging_loki import LokiHandler
 from time import time
+from joblib import Memory
 import cv2
 import numpy as np
 import logging
 import traceback
+
+memory = Memory("/tmp", verbose=0)
 
 # 로그 설정
 loki_handler = LokiHandler(
@@ -25,7 +28,7 @@ loki_handler = LokiHandler(
 # logger.addHandler(file_handler)
 
 class FrameProcessor:
-    def __init__(self, frame_interval=5):
+    def __init__(self, frame_interval=10): # 프레임을 5 -> 10으로 변경
         self.frame_count = 0
         self.frame_interval = frame_interval
         self.last_process_time = time()
@@ -44,6 +47,7 @@ class FrameProcessor:
             return True
         return False
 
+@memory.cache
 def process_frame(data, frame_processor):
     """
     ### 프레임 처리
@@ -66,6 +70,14 @@ def process_frame(data, frame_processor):
             frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
             if frame is None:
                 raise ValueError("이미지 데이터 디코딩 실패")
+            
+            # 이미지 크기 조정 (예: 640x480)
+            max_width = 640
+            scale = max_width / frame.shape[1]
+            width = int(frame.shape[1] * scale)
+            height = int(frame.shape[0] * scale)
+            frame = cv2.resize(frame, (width, height))
+
         except Exception as e:
             logging.error(f"이미지 디코딩 오류: {str(e)}")
             return None
@@ -77,7 +89,8 @@ def process_frame(data, frame_processor):
                 frame,
                 actions=['age','gender'],
                 enforce_detection=False,
-                detector_backend='opencv' # mtcnn, retinaface, yolo 등을 사용할 수 있음.
+                detector_backend='ssd', # mtcnn, retinaface, yolo 등을 사용할 수 있음.
+                align=False  # 얼굴 정렬 비활성화로 속도 향상
             )
 
              # 리스트가 아닌 경우 리스트로 변환

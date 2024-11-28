@@ -2,6 +2,12 @@ services:
   backend:
     image: forring7/gender_analysis_vision_python_server:1.0.0
     container_name: python_backend
+    deploy:
+      resources:
+        limits:
+          memory: 900M
+        reservations:
+          memory: 700M
     ports:
       - "8000:8000"  # 백엔드 서비스가 외부에서 접근 가능한 포트 설정
     environment:
