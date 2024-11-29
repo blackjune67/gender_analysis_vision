@@ -15,6 +15,9 @@ RUN apt-get update && apt-get install -y \
 # 작업 디렉터리 생성
 WORKDIR /gender_analysis_vision
 
+# curl 설치
+RUN apt-get update && apt-get install -y curl
+
 # pip 최신 버전 업그레이드
 RUN pip install --upgrade pip
 
