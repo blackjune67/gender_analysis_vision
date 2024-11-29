@@ -33,12 +33,12 @@ RUN pip install --no-cache-dir -r requirements.txt
 RUN mkdir -p /root/.deepface/weights
 
 # 나이 추정 모델 다운로드
-RUN wget -f -o /root/.deepface/weights/age_model_weights.h5 \
+RUN wget -O /root/.deepface/weights/age_model_weights.h5 \
     https://github.com/serengil/deepface_models/releases/download/v1.0/age_model_weights.h5 \
     && test -f /root/.deepface/weights/age_model_weights.h5
 
 # 성별 분류 모델 다운로드
-RUN wget -f -o /root/.deepface/weights/gender_model_weights.h5 \
+RUN wget -O /root/.deepface/weights/gender_model_weights.h5 \
     https://github.com/serengil/deepface_models/releases/download/v1.0/gender_model_weights.h5 \
     && test -f /root/.deepface/weights/gender_model_weights.h5
 
