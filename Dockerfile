@@ -26,6 +26,26 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 # RUN pip install -r /app/requirements.txt
 
+# DeepFace 모델 파일 다운로드
+RUN mkdir -p /root/.deepface/weights
+
+# 나이 추정 모델 다운로드
+RUN curl -o /root/.deepface/weights/age_model_weights.h5 \
+    https://github.com/serengil/deepface_models/releases/download/v1.0/age_model_weights.h5
+
+# 성별 분류 모델 다운로드
+RUN curl -o /root/.deepface/weights/gender_model_weights.h5 \
+    https://github.com/serengil/deepface_models/releases/download/v1.0/gender_model_weights.h5
+
+# 감정 분석 모델 다운로드 (필요한 경우)
+# RUN curl -o /root/.deepface/weights/emotion_model_weights.h5 \
+    # https://github.com/serengil/deepface_models/releases/download/v1.0/emotion_model_weights.h5
+
+# 얼굴 검출 모델 다운로드 (필요한 경우)
+# RUN curl -o /root/.deepface/weights/resnet50_face_model.h5 \
+    # https://github.com/serengil/deepface_models/releases/download/v1.0/resnet50_face_model.h5
+
+
 # COPY yolo11n.pt . 
 COPY . .
 
