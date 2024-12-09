@@ -88,7 +88,7 @@ def process_frame(data, frame_processor):
             analysis = DeepFace.analyze(
                 frame,
                 actions=['age','gender'],
-                enforce_detection=False,
+                enforce_detection=True, # 얼굴 검출이 실패해도 기본값이 있어서 결과가 나오게끔: False
                 detector_backend='ssd', # mtcnn, retinaface, yolo 등을 사용할 수 있음.
                 align=False  # 얼굴 정렬 비활성화로 속도 향상
             )
