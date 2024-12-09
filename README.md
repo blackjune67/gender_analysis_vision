@@ -9,6 +9,7 @@
 - **백엔드 프레임워크**: FastAPI
 - **분석 모듈**: DeepFace
 - **컨테이너화**: Docker, Docker Compose
+- **모니터링**: Grafana, Loki, Promtail
 
 ### 시스템 구성도
 ![System Diagram](/gender_diagram.drawio.png)
